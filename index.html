@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockAnalytics — Adobe Stock Contributor Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04080f;--surface:#0c1424;--surface2:#101c30;
+  --border:rgba(99,179,237,0.1);--border2:rgba(99,179,237,0.2);
+  --blue:#63b3ed;--cyan:#76e4f7;--green:#68d391;--red:#fc8181;--gold:#f6e05e;
+  --text:#e2e8f0;--muted:#4a5568;--muted2:#718096;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--display:'Syne',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(99,179,237,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.login-card{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:48px 40px;text-align:center;max-width:420px;width:100%;position:relative;z-index:1;}
+.login-logo{font-family:var(--display);font-size:32px;font-weight:800;color:var(--cyan);margin-bottom:6px;}
+.login-tag{font-size:13px;color:var(--muted2);margin-bottom:36px;}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:14px;background:#fff;border:none;border-radius:12px;color:#1a202c;font-size:15px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .2s;margin-bottom:16px;}
+.google-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.g-icon{width:20px;height:20px;flex-shrink:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23FFC107' d='M43.6 20H24v8h11.3C33.6 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.2 8 3l5.7-5.7C34 6 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.7-.4-4z'/%3E%3Cpath fill='%23FF3D00' d='M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.8 1.2 8 3l5.7-5.7C34 6 29.3 4 24 4c-7.7 0-14.3 4.3-17.7 10.7z'/%3E%3Cpath fill='%234CAF50' d='M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z'/%3E%3Cpath fill='%231976D2' d='M43.6 20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C41 39.2 44 34 44 24c0-1.3-.1-2.7-.4-4z'/%3E%3C/svg%3E") center/contain no-repeat;}
+.login-note{font-size:12px;color:var(--muted);}
+.login-note b{color:var(--blue);}
+
+/* NO LICENSE */
+#nolicense-screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.nolic-card{background:var(--surface);border:1px solid rgba(252,129,129,.2);border-radius:24px;padding:40px;text-align:center;max-width:420px;width:100%;}
+.nolic-icon{font-size:48px;margin-bottom:16px;}
+.nolic-title{font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:8px;}
+.nolic-msg{font-size:14px;color:var(--muted2);margin-bottom:24px;line-height:1.6;}
+.buy-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:linear-gradient(135deg,var(--gold),#ed8936);border:none;border-radius:10px;color:#000;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;margin-bottom:10px;transition:opacity .2s;}
+.buy-btn:hover{opacity:.85;}
+.logout-link{font-size:12px;color:var(--muted2);cursor:pointer;text-decoration:underline;margin-top:8px;display:block;}
+
+/* APP */
+#app{display:none;flex-direction:column;min-height:100vh;position:relative;z-index:1;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:rgba(8,14,26,.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+.nav-logo{font-family:var(--display);font-size:20px;font-weight:800;color:var(--cyan);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.nav-user{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted2);}
+.nav-avatar{width:30px;height:30px;border-radius:50%;border:2px solid var(--border2);}
+.lic-badge{padding:3px 10px;background:rgba(104,211,145,.12);border:1px solid rgba(104,211,145,.3);border-radius:20px;font-size:11px;color:var(--green);font-weight:600;}
+.nav-out{padding:6px 14px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted2);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .2s;}
+.nav-out:hover{border-color:var(--red);color:var(--red);}
+
+main{flex:1;padding:32px;max-width:1200px;margin:0 auto;width:100%;}
+
+.search-label{font-family:var(--display);font-size:28px;font-weight:700;margin-bottom:16px;}
+.search-label span{color:var(--cyan);}
+.search-box{display:flex;gap:12px;max-width:600px;margin-bottom:32px;}
+.search-input{flex:1;padding:14px 18px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-size:14px;font-family:var(--mono);outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--cyan);}
+.search-input::placeholder{color:var(--muted);}
+.search-btn{padding:14px 28px;background:var(--cyan);border:none;border-radius:12px;color:#04080f;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.search-btn:hover{background:#76e4f7;transform:translateY(-1px);}
+.search-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* PROFILE */
+#profile-section{display:none;margin-bottom:24px;}
+.profile-card{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.profile-info h2{font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:4px;}
+.p-id{font-family:var(--mono);font-size:12px;color:var(--muted2);}
+.profile-stats{display:flex;gap:24px;flex-wrap:wrap;}
+.pstat{text-align:center;}
+.pstat-val{font-family:var(--display);font-size:24px;font-weight:800;color:var(--cyan);display:block;}
+.pstat-label{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;}
+
+/* FILTER */
+#filter-section{display:none;margin-bottom:20px;}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.filter-btn{padding:8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted2);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .2s;}
+.filter-btn:hover{border-color:var(--border2);color:var(--text);}
+.filter-btn.active{background:rgba(99,179,237,.1);border-color:var(--blue);color:var(--blue);}
+.sort-sel{padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--font);outline:none;cursor:pointer;margin-left:auto;}
+
+/* ASSETS */
+#assets-section{display:none;}
+.assets-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.assets-count{font-size:13px;color:var(--muted2);}
+.assets-count b{color:var(--cyan);}
+.assets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+.asset-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .2s;cursor:pointer;}
+.asset-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.asset-thumb{width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--surface2);display:block;}
+.asset-no-thumb{width:100%;aspect-ratio:4/3;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:32px;}
+.asset-info{padding:12px;}
+.asset-title{font-size:12px;font-weight:500;margin-bottom:8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.asset-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.asset-dl{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green);}
+.asset-date{font-size:11px;color:var(--muted2);}
+.type-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;margin-bottom:6px;}
+.tp{background:rgba(99,179,237,.15);color:var(--blue);}
+.tv{background:rgba(252,129,129,.15);color:var(--red);}
+.ti{background:rgba(246,224,94,.15);color:var(--gold);}
+.tvc{background:rgba(118,228,247,.15);color:var(--cyan);}
+.tt{background:rgba(104,211,145,.15);color:var(--green);}
+.kw-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.kw{padding:2px 7px;background:var(--surface2);border-radius:4px;font-size:10px;color:var(--muted2);}
+
+/* SKELETON */
+.skeleton{background:var(--surface);border-radius:12px;overflow:hidden;animation:pulse 1.5s ease-in-out infinite;}
+.sk-thumb{width:100%;aspect-ratio:4/3;background:var(--surface2);}
+.sk-body{padding:12px;}
+.sk-line{height:10px;background:var(--surface2);border-radius:4px;margin-bottom:8px;}
+.sk-short{width:60%;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+.load-more{display:block;width:100%;max-width:300px;margin:24px auto 0;padding:14px;background:transparent;border:1px solid var(--border2);border-radius:12px;color:var(--blue);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .2s;}
+.load-more:hover{background:rgba(99,179,237,.05);}
+.load-more:disabled{opacity:.4;cursor:not-allowed;}
+
+.empty{text-align:center;padding:60px 20px;color:var(--muted2);}
+.empty .ei{font-size:48px;margin-bottom:12px;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#04080f;padding:10px 24px;border-radius:30px;font-size:13px;font-weight:700;transition:transform .3s;z-index:999;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.red{background:var(--red);color:#fff;}
+.spinner{width:16px;height:16px;border:2px solid rgba(4,8,15,.3);border-top-color:#04080f;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.hidden{display:none!important;}
+@media(max-width:600px){nav{padding:12px 16px;}main{padding:16px;}.search-box{flex-direction:column;}.assets-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}.profile-card{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">StockAnalytics</div>
+    <div class="login-tag">Adobe Stock Contributor Analytics Platform</div>
+    <button class="google-btn" id="google-login-btn">
+      <div class="g-icon"></div>
+      Google দিয়ে Login করুন
+    </button>
+    <div class="login-note">Login করলে আপনার license verify হবে।<br>License নেই? <b>Tarek Rahman</b>-এর সাথে যোগাযোগ করুন।</div>
+  </div>
+</div>
+
+<!-- NO LICENSE -->
+<div id="nolicense-screen">
+  <div class="nolic-card">
+    <div class="nolic-icon" id="nolic-icon">🔒</div>
+    <div class="nolic-title" id="nolic-title">License নেই</div>
+    <div class="nolic-msg" id="nolic-msg">আপনার email-এ কোনো active license পাওয়া যায়নি।</div>
+    <button class="buy-btn" id="wa-btn">💬 WhatsApp-এ License কিনুন</button>
+    <button class="buy-btn" id="bk-btn" style="background:linear-gradient(135deg,#e2136e,#c01057);color:#fff">💳 bKash: 01410941130</button>
+    <button class="buy-btn" id="ng-btn" style="background:linear-gradient(135deg,#f7941d,#d97706);color:#fff">📱 Nagad: 01723941110</button>
+    <span class="logout-link" id="nolic-logout">অন্য account দিয়ে login করুন</span>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav>
+    <div class="nav-logo">StockAnalytics</div>
+    <div class="nav-right">
+      <div class="nav-user">
+        <img id="nav-avatar" class="nav-avatar" src="" alt="">
+        <span id="nav-uname"></span>
+      </div>
+      <div class="lic-badge" id="nav-exp"></div>
+      <button class="nav-out" id="nav-logout">Logout</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="search-label">Contributor <span>Portfolio</span> Tracker</div>
+    <div class="search-box">
+      <input id="cid-input" class="search-input" placeholder="Contributor ID or Profile URL..." autocomplete="off">
+      <button id="track-btn" class="search-btn">
+        <span id="track-txt">Track</span>
+        <span id="track-spin" class="spinner hidden"></span>
+      </button>
+    </div>
+
+    <div id="profile-section">
+      <div class="profile-card">
+        <div class="profile-info">
+          <h2 id="p-name">—</h2>
+          <div class="p-id" id="p-id"></div>
+        </div>
+        <div class="profile-stats">
+          <div class="pstat"><span class="pstat-val" id="p-total">0</span><span class="pstat-label">Total</span></div>
+          <div class="pstat"><span class="pstat-val" id="p-photo">0</span><span class="pstat-label">Photos</span></div>
+          <div class="pstat"><span class="pstat-val" id="p-video">0</span><span class="pstat-label">Videos</span></div>
+          <div class="pstat"><span class="pstat-val" id="p-vec">0</span><span class="pstat-label">Vectors</span></div>
+          <div class="pstat"><span class="pstat-val" id="p-ill">0</span><span class="pstat-label">Illust.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="filter-section">
+      <div class="filter-bar">
+        <button class="filter-btn active" data-type="all">All</button>
+        <button class="filter-btn" data-type="photo">🖼 Photos</button>
+        <button class="filter-btn" data-type="video">🎬 Videos</button>
+        <button class="filter-btn" data-type="vector">✏️ Vectors</button>
+        <button class="filter-btn" data-type="illustration">🎨 Illust.</button>
+        <select class="sort-sel" id="sort-sel">
+          <option value="downloads">Most Downloads</option>
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="assets-section">
+      <div class="assets-hdr">
+        <div class="assets-count">Showing <b id="show-count">0</b> assets</div>
+      </div>
+      <div id="assets-grid" class="assets-grid"></div>
+      <button id="load-more" class="load-more hidden">Load More</button>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const cfg = {
+  apiKey:"AIzaSyCELCrIakcrhYhMVsuwebO4HNRgPYXSC5o",
+  authDomain:"contributor-license.firebaseapp.com",
+  projectId:"contributor-license",
+  storageBucket:"contributor-license.firebasestorage.app",
+  messagingSenderId:"443409137516",
+  appId:"1:443409137516:web:79c742d040201d362a3d49"
+};
+
+const app  = initializeApp(cfg);
+const auth = getAuth(app);
+const gp   = new GoogleAuthProvider();
+
+const API_KEY = "AIzaSyCELCrIakcrhYhMVsuwebO4HNRgPYXSC5o";
+const FSURL   = `https://firestore.googleapis.com/v1/projects/contributor-license/databases/(default)/documents/licenses`;
+
+function parseFS(fields={}) {
+  const o={};
+  for(const [k,v] of Object.entries(fields)){
+    if(v.stringValue!==undefined)o[k]=v.stringValue;
+    else if(v.integerValue!==undefined)o[k]=String(v.integerValue);
+    else if(v.nullValue!==undefined)o[k]=null;
+  }
+  return o;
+}
+
+async function checkLicense(email) {
+  try {
+    const res  = await fetch(`${FSURL}?key=${API_KEY}`);
+    const data = await res.json();
+    if(!data.documents) return {valid:false,reason:'no_license'};
+    for(const d of data.documents){
+      const f = parseFS(d.fields||{});
+      if(f.email && f.email.toLowerCase()===email.toLowerCase()){
+        if(f.status==='revoked') return {valid:false,reason:'revoked'};
+        if(f.expiry && f.expiry!=='' && new Date(f.expiry)<new Date()) return {valid:false,reason:'expired'};
+        return {valid:true,name:f.name,expiry:f.expiry,months:f.months};
+      }
+    }
+    return {valid:false,reason:'no_license'};
+  } catch(e){ return {valid:false,reason:'error'}; }
+}
+
+onAuthStateChanged(auth, async user => {
+  if(user){
+    const r = await checkLicense(user.email);
+    if(r.valid){
+      document.getElementById('nav-avatar').src   = user.photoURL||'';
+      document.getElementById('nav-uname').textContent = user.displayName||user.email;
+      if(r.expiry){
+        const days = Math.ceil((new Date(r.expiry)-new Date())/86400000);
+        document.getElementById('nav-exp').textContent = `✅ ${days} days left`;
+      } else {
+        document.getElementById('nav-exp').textContent = '♾ Lifetime';
+      }
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('nolicense-screen').style.display='none';
+      document.getElementById('app').style.display='flex';
+    } else {
+      const msgs={
+        expired:['⏰','License মেয়াদ শেষ','আপনার license নবায়ন করুন।'],
+        revoked:['🚫','License বাতিল','আপনার license বাতিল করা হয়েছে।'],
+        no_license:['🔒','License নেই',`${user.email} — এই email-এ কোনো license নেই।`],
+        error:['⚠️','Error','License check করতে সমস্যা হয়েছে।'],
+      };
+      const [ic,ti,ms] = msgs[r.reason]||msgs.no_license;
+      document.getElementById('nolic-icon').textContent=ic;
+      document.getElementById('nolic-title').textContent=ti;
+      document.getElementById('nolic-msg').textContent=ms;
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('nolicense-screen').style.display='flex';
+      document.getElementById('app').style.display='none';
+    }
+  } else {
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('nolicense-screen').style.display='none';
+    document.getElementById('app').style.display='none';
+  }
+});
+
+document.getElementById('google-login-btn').addEventListener('click', ()=>signInWithPopup(auth,gp));
+document.getElementById('nav-logout').addEventListener('click', ()=>signOut(auth));
+document.getElementById('nolic-logout').addEventListener('click', ()=>signOut(auth));
+</script>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => n==null?'—':Number(n).toLocaleString();
+
+function showToast(msg,type){
+  const t=$('toast');
+  t.textContent=msg;
+  t.className='toast'+(type==='red'?' red':'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function extractUID(s){
+  if(!s)return null;
+  s=s.trim();
+  if(/^[0-9]+$/.test(s))return s;
+  const m=s.match(/contributor\/(\d+)/i)||s.match(/creator_id=(\d+)/i);
+  return m?m[1]:null;
+}
+
+const BASE='https://stock.adobe.com';
+let uid=null, allAssets=[], filtered=[], page=0;
+const PG=24;
+
+async function fc(url){
+  try{
+    const r=await fetch(url,{headers:{'Accept':'text/html'}});
+    const h=await r.text();
+    const m=h.match(/"totalResults":\s*([0-9]+)/i)||h.match(/([0-9,]+)\s+results/i);
+    return m?parseInt(m[1].replace(/,/g,''),10):0;
+  }catch{return 0;}
+}
+
+async function getName(id){
+  try{
+    const r=await fetch(`${BASE}/contributor/${id}`);
+    const h=await r.text();
+    const m=h.match(/<title[^>]*>([^<]+)<\/title>/i);
+    return m?m[1].replace(/\s*[-|].*$/,'').trim():'ID: '+id;
+  }catch{return 'ID: '+id;}
+}
+
+async function getAssets(id,type,sort,offset){
+  try{
+    let url=`${BASE}/search?creator_id=${id}&limit=100&offset=${offset}`;
+    if(type&&type!=='all')url+=`&filters[content_type:${type}]=1`;
+    if(sort==='downloads')url+='&order=nb_downloads';
+    else if(sort==='newest')url+='&order=newest';
+    else if(sort==='oldest')url+='&order=creation_date-asc';
+    const r=await fetch(url,{headers:{'Accept':'text/html'}});
+    const h=await r.text();
+    const assets=[];
+    // Try parse JSON state
+    const dm=h.match(/window\.__STATE__\s*=\s*(\{[\s\S]*?\});<\/script>/);
+    if(dm){
+      try{
+        const st=JSON.parse(dm[1]);
+        const list=st?.search?.assets?.list||st?.assets?.list||[];
+        list.forEach(i=>assets.push({
+          id:i.id,title:i.title||i.description||'Untitled',
+          downloads:i.nb_results||i.download_count||0,
+          date:i.creation_date||i.uploaded_at||'',
+          type:i.content_type||'photo',
+          thumb:i.thumbnail_url||i.comp_url||'',
+          keywords:(i.keywords||[]).slice(0,5),
+          url:`${BASE}/stock-photo/${i.id}`
+        }));
+      }catch(e){}
+    }
+    // Fallback regex
+    if(!assets.length){
+      const matches=[...h.matchAll(/"id":(\d+).*?"title":"((?:[^"\\]|\\.)*).*?"nb_results":(\d+).*?"creation_date":"([^"]*).*?"content_type":"([^"]*).*?"thumbnail_url":"([^"]*)"/g)];
+      matches.forEach(m=>assets.push({
+        id:m[1],title:m[2].replace(/\\"/g,'"'),downloads:parseInt(m[3])||0,
+        date:m[4],type:m[5],thumb:m[6].replace(/\\\//g,'/'),
+        keywords:[],url:`${BASE}/stock-photo/${m[1]}`
+      }));
+    }
+    return assets;
+  }catch{return [];}
+}
+
+function typeBadge(t){
+  const map={
+    photo:['tp','🖼 Photo'],video:['tv','🎬 Video'],
+    illustration:['ti','🎨 Illust'],zip_vector:['tvc','✏️ Vector'],
+    template:['tt','📄 Template']
+  };
+  const [cls,label]=map[t]||['tp','📁 File'];
+  return `<span class="type-badge ${cls}">${label}</span>`;
+}
+
+function skeletons(){
+  $('assets-grid').innerHTML=Array(12).fill(`<div class="skeleton"><div class="sk-thumb"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line sk-short"></div></div></div>`).join('');
+}
+
+function renderAssets(reset){
+  const grid=$('assets-grid');
+  if(reset){grid.innerHTML='';page=0;}
+  const s=page*PG, e=s+PG, slice=filtered.slice(s,e);
+  $('show-count').textContent=fmt(filtered.length);
+  if(!slice.length&&reset){
+    grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">🔍</div><p>কোনো asset পাওয়া যায়নি</p></div>`;
+    $('load-more').classList.add('hidden');
+    return;
+  }
+  slice.forEach(a=>{
+    const card=document.createElement('div');
+    card.className='asset-card';
+    card.onclick=()=>window.open(a.url||`${BASE}/search?creator_id=${uid}`,'_blank');
+    const dt=a.date?new Date(a.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    const kw=(a.keywords||[]).slice(0,4).map(k=>`<span class="kw">${k}</span>`).join('');
+    card.innerHTML=`
+      ${a.thumb?`<img class="asset-thumb" src="${a.thumb}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:'' }
+      <div class="asset-no-thumb" style="${a.thumb?'display:none':''}">📁</div>
+      <div class="asset-info">
+        ${typeBadge(a.type)}
+        <div class="asset-title">${a.title}</div>
+        <div class="asset-meta">
+          <div class="asset-dl">⬇ ${fmt(a.downloads)}</div>
+          <div class="asset-date">📅 ${dt}</div>
+        </div>
+        <div class="kw-wrap">${kw}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  page++;
+  filtered.length>e ? $('load-more').classList.remove('hidden') : $('load-more').classList.add('hidden');
+}
+
+async function track(){
+  uid=extractUID($('cid-input').value);
+  if(!uid){showToast('Valid Contributor ID দিন','red');return;}
+  allAssets=[];filtered=[];page=0;
+  $('track-btn').disabled=true;
+  $('track-txt').classList.add('hidden');
+  $('track-spin').classList.remove('hidden');
+  $('profile-section').style.display='block';
+  $('filter-section').style.display='block';
+  $('assets-section').style.display='block';
+  skeletons();
+  const sort=$('sort-sel').value;
+  const [name,total,photo,video,vec,ill]=await Promise.all([
+    getName(uid),
+    fc(`${BASE}/search?creator_id=${uid}`),
+    fc(`${BASE}/search?creator_id=${uid}&filters[content_type:photo]=1`),
+    fc(`${BASE}/search?creator_id=${uid}&filters[content_type:video]=1`),
+    fc(`${BASE}/search?creator_id=${uid}&filters[content_type:zip_vector]=1`),
+    fc(`${BASE}/search?creator_id=${uid}&filters[content_type:illustration]=1`),
+  ]);
+  $('p-name').textContent=name;
+  $('p-id').textContent='ID: '+uid;
+  $('p-total').textContent=fmt(total);
+  $('p-photo').textContent=fmt(photo);
+  $('p-video').textContent=fmt(video);
+  $('p-vec').textContent=fmt(vec);
+  $('p-ill').textContent=fmt(ill);
+  const assets=await getAssets(uid,'all',sort,0);
+  allAssets=assets;filtered=assets;
+  renderAssets(true);
+  $('track-btn').disabled=false;
+  $('track-txt').classList.remove('hidden');
+  $('track-spin').classList.add('hidden');
+}
+
+async function loadMore(){
+  const btn=$('load-more');
+  btn.disabled=true;btn.textContent='Loading...';
+  if(page*PG>=allAssets.length&&allAssets.length%100===0){
+    const type=document.querySelector('.filter-btn.active')?.dataset.type||'all';
+    const more=await getAssets(uid,type==='all'?'':type,$('sort-sel').value,allAssets.length);
+    allAssets=[...allAssets,...more];filtered=allAssets;
+  }
+  renderAssets(false);
+  btn.disabled=false;btn.textContent='Load More';
+}
+
+/* Filter buttons */
+document.querySelectorAll('.filter-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const t=b.dataset.type;
+    const typeMap={photo:'photo',video:'video',vector:'zip_vector',illustration:'illustration'};
+    filtered=t==='all'?allAssets:allAssets.filter(a=>a.type===(typeMap[t]||t)||a.type===t);
+    renderAssets(true);
+  });
+});
+
+$('sort-sel').addEventListener('change',()=>{
+  const s=$('sort-sel').value;
+  if(s==='downloads')filtered.sort((a,b)=>(b.downloads||0)-(a.downloads||0));
+  else if(s==='newest')filtered.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  else if(s==='oldest')filtered.sort((a,b)=>new Date(a.date||0)-new Date(b.date||0));
+  renderAssets(true);
+});
+
+$('track-btn').addEventListener('click',track);
+$('load-more').addEventListener('click',loadMore);
+$('cid-input').addEventListener('keydown',e=>{if(e.key==='Enter')track();});
+
+/* Contact buttons */
+document.getElementById('wa-btn').addEventListener('click',()=>window.open('https://wa.me/8801723941110','_blank'));
+document.getElementById('bk-btn').addEventListener('click',()=>{navigator.clipboard.writeText('01410941130');showToast('✅ bKash নম্বর কপি হয়েছে!');});
+document.getElementById('ng-btn').addEventListener('click',()=>{navigator.clipboard.writeText('01723941110');showToast('✅ Nagad নম্বর কপি হয়েছে!');});
+</script>
+</body>
+</html>
