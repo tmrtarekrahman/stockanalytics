@@ -3,357 +3,202 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StockAnalytics — Adobe Stock Contributor Analytics</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<title>StockAnalytics</title>
 <style>
-:root{
-  --bg:#04080f;--surface:#0c1424;--surface2:#101c30;
-  --border:rgba(99,179,237,0.1);--border2:rgba(99,179,237,0.2);
-  --blue:#63b3ed;--cyan:#76e4f7;--green:#68d391;--red:#fc8181;--gold:#f6e05e;
-  --text:#e2e8f0;--muted:#4a5568;--muted2:#718096;
-  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--display:'Syne',sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(99,179,237,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
-
-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:rgba(8,14,26,.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
-.nav-logo{font-family:var(--display);font-size:20px;font-weight:800;color:var(--cyan);}
-.nav-right{display:flex;align-items:center;gap:12px;}
-.nav-badge{padding:6px 14px;background:rgba(104,211,145,.12);border:1px solid rgba(104,211,145,.3);border-radius:20px;font-size:11px;color:var(--green);font-weight:600;}
-
-main{flex:1;padding:32px;max-width:1200px;margin:0 auto;width:100%;position:relative;z-index:1;}
-
-.search-label{font-family:var(--display);font-size:28px;font-weight:700;margin-bottom:16px;}
-.search-label span{color:var(--cyan);}
-.search-box{display:flex;gap:12px;max-width:600px;margin-bottom:32px;}
-.search-input{flex:1;padding:14px 18px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-size:14px;font-family:var(--mono);outline:none;transition:border-color .2s;}
-.search-input:focus{border-color:var(--cyan);}
-.search-input::placeholder{color:var(--muted);}
-.search-btn{padding:14px 28px;background:var(--cyan);border:none;border-radius:12px;color:#04080f;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;white-space:nowrap;}
-.search-btn:hover{background:#76e4f7;transform:translateY(-1px);}
-.search-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
-
-#profile-section{display:none;margin-bottom:24px;}
-.profile-card{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
-.profile-info h2{font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:4px;}
-.p-id{font-family:var(--mono);font-size:12px;color:var(--muted2);}
-.profile-stats{display:flex;gap:24px;flex-wrap:wrap;}
-.pstat{text-align:center;}
-.pstat-val{font-family:var(--display);font-size:24px;font-weight:800;color:var(--cyan);display:block;}
-.pstat-label{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;}
-
-#filter-section{display:none;margin-bottom:20px;}
-.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.filter-btn{padding:8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted2);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .2s;}
-.filter-btn:hover{border-color:var(--border2);color:var(--text);}
-.filter-btn.active{background:rgba(99,179,237,.1);border-color:var(--blue);color:var(--blue);}
-.sort-sel{padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--font);outline:none;cursor:pointer;margin-left:auto;}
-
-#assets-section{display:none;}
-.assets-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.assets-count{font-size:13px;color:var(--muted2);}
-.assets-count b{color:var(--cyan);}
-.assets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
-.asset-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .2s;cursor:pointer;}
-.asset-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
-.asset-thumb{width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--surface2);display:block;}
-.asset-no-thumb{width:100%;aspect-ratio:4/3;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:32px;}
-.asset-info{padding:12px;}
-.asset-title{font-size:12px;font-weight:500;margin-bottom:8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.asset-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-.asset-dl{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green);}
-.asset-date{font-size:11px;color:var(--muted2);}
-.type-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;margin-bottom:6px;}
-.tp{background:rgba(99,179,237,.15);color:var(--blue);}
-.tv{background:rgba(252,129,129,.15);color:var(--red);}
-.ti{background:rgba(246,224,94,.15);color:var(--gold);}
-.tvc{background:rgba(118,228,247,.15);color:var(--cyan);}
-.tt{background:rgba(104,211,145,.15);color:var(--green);}
-.kw-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
-.kw{padding:2px 7px;background:var(--surface2);border-radius:4px;font-size:10px;color:var(--muted2);}
-
-.skeleton{background:var(--surface);border-radius:12px;overflow:hidden;animation:pulse 1.5s ease-in-out infinite;}
-.sk-thumb{width:100%;aspect-ratio:4/3;background:var(--surface2);}
-.sk-body{padding:12px;}
-.sk-line{height:10px;background:var(--surface2);border-radius:4px;margin-bottom:8px;}
-.sk-short{width:60%;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
-
-.load-more{display:block;width:100%;max-width:300px;margin:24px auto 0;padding:14px;background:transparent;border:1px solid var(--border2);border-radius:12px;color:var(--blue);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .2s;}
-.load-more:hover{background:rgba(99,179,237,.05);}
-.load-more:disabled{opacity:.4;cursor:not-allowed;}
-
-.empty{text-align:center;padding:60px 20px;color:var(--muted2);}
-.empty .ei{font-size:48px;margin-bottom:12px;}
-
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#04080f;padding:10px 24px;border-radius:30px;font-size:13px;font-weight:700;transition:transform .3s;z-index:999;}
-.toast.show{transform:translateX(-50%) translateY(0);}
-.toast.red{background:var(--red);color:#fff;}
-.spinner{width:16px;height:16px;border:2px solid rgba(4,8,15,.3);border-top-color:#04080f;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.hidden{display:none!important;}
-@media(max-width:600px){nav{padding:12px 16px;}main{padding:16px;}.search-box{flex-direction:column;}.assets-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}.profile-card{flex-direction:column;}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#04080f;font-family:'DM Sans',Arial,sans-serif;color:#e2e8f0;min-height:100vh}
+nav{padding:16px 32px;background:rgba(8,14,26,.9);border-bottom:1px solid rgba(99,179,237,.1);display:flex;justify-content:space-between}
+.logo{font-size:20px;font-weight:800;color:#76e4f7}
+.badge{padding:6px 14px;background:rgba(104,211,145,.12);border:1px solid rgba(104,211,145,.3);border-radius:20px;font-size:11px;color:#68d391}
+main{max-width:1200px;margin:0 auto;padding:32px}
+.title{font-size:28px;font-weight:700;margin-bottom:16px}
+.title span{color:#76e4f7}
+.search-box{display:flex;gap:12px;margin-bottom:32px;max-width:600px}
+input{flex:1;padding:14px;background:#0c1424;border:1px solid rgba(99,179,237,.2);border-radius:12px;color:#e2e8f0;font-size:14px;outline:none}
+input:focus{border-color:#76e4f7}
+button{padding:14px 28px;background:#76e4f7;border:none;border-radius:12px;color:#000;font-weight:700;cursor:pointer}
+button:hover{opacity:.9}
+button:disabled{opacity:.5}
+#profile{display:none;background:#0c1424;border:1px solid rgba(99,179,237,.2);border-radius:16px;padding:24px;margin-bottom:24px}
+.profile-header{display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.profile-info h2{font-size:22px;font-weight:700;margin-bottom:4px}
+.stats{display:flex;gap:24px;flex-wrap:wrap}
+.stat-val{font-size:24px;font-weight:800;color:#76e4f7}
+.stat-label{font-size:11px;color:#718096;text-transform:uppercase}
+#assets{display:none;margin-top:24px}
+.assets-count{font-size:13px;color:#718096;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+.asset{background:#0c1424;border:1px solid rgba(99,179,237,.1);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s}
+.asset:hover{border-color:#76e4f7}
+.thumb{width:100%;aspect-ratio:4/3;background:rgba(99,179,237,.05);object-fit:cover;display:block}
+.info{padding:12px}
+.asset-title{font-size:12px;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta{display:flex;justify-content:space-between;font-size:11px;color:#718096}
+.empty{text-align:center;padding:60px 20px;color:#718096}
+.error{background:rgba(252,129,129,.1);border:1px solid rgba(252,129,129,.3);border-radius:12px;padding:16px;margin:20px 0;color:#fc8181}
+.success{background:rgba(104,211,145,.1);border:1px solid rgba(104,211,145,.3);border-radius:12px;padding:16px;margin:20px 0;color:#68d391}
+.loading{text-align:center;padding:40px;color:#76e4f7}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid rgba(118,228,247,.3);border-top-color:#76e4f7;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.console{background:#000;border:1px solid rgba(99,179,237,.2);border-radius:8px;padding:12px;margin-top:20px;font-family:monospace;font-size:11px;color:#76e4f7;max-height:200px;overflow-y:auto}
 </style>
 </head>
 <body>
 
 <nav>
-  <div class="nav-logo">StockAnalytics</div>
-  <div class="nav-right">
-    <div class="nav-badge">✅ Free Edition</div>
-  </div>
+  <div class="logo">StockAnalytics</div>
+  <div class="badge">✅ Free Edition</div>
 </nav>
 
 <main>
-  <div class="search-label">Contributor <span>Portfolio</span> Tracker</div>
+  <div class="title">Contributor <span>Portfolio</span> Tracker</div>
   <div class="search-box">
-    <input id="cid-input" class="search-input" placeholder="Contributor ID or Profile URL..." autocomplete="off">
-    <button id="track-btn" class="search-btn">
-      <span id="track-txt">Track</span>
-      <span id="track-spin" class="spinner hidden"></span>
-    </button>
+    <input id="cid" placeholder="Enter Contributor ID (e.g., 212998954)..." autocomplete="off">
+    <button id="btn" onclick="track()">Track</button>
   </div>
 
-  <div id="profile-section">
-    <div class="profile-card">
+  <div id="profile">
+    <div class="profile-header">
       <div class="profile-info">
-        <h2 id="p-name">—</h2>
-        <div class="p-id" id="p-id"></div>
+        <h2 id="name">—</h2>
+        <p id="id" style="font-size:12px;color:#718096"></p>
       </div>
-      <div class="profile-stats">
-        <div class="pstat"><span class="pstat-val" id="p-total">0</span><span class="pstat-label">Total</span></div>
-        <div class="pstat"><span class="pstat-val" id="p-photo">0</span><span class="pstat-label">Photos</span></div>
-        <div class="pstat"><span class="pstat-val" id="p-video">0</span><span class="pstat-label">Videos</span></div>
-        <div class="pstat"><span class="pstat-val" id="p-vec">0</span><span class="pstat-label">Vectors</span></div>
-        <div class="pstat"><span class="pstat-val" id="p-ill">0</span><span class="pstat-label">Illust.</span></div>
+      <div class="stats">
+        <div><div class="stat-val" id="total">0</div><div class="stat-label">Total</div></div>
+        <div><div class="stat-val" id="photo">0</div><div class="stat-label">Photos</div></div>
+        <div><div class="stat-val" id="video">0</div><div class="stat-label">Videos</div></div>
+        <div><div class="stat-val" id="vector">0</div><div class="stat-label">Vectors</div></div>
       </div>
     </div>
   </div>
 
-  <div id="filter-section">
-    <div class="filter-bar">
-      <button class="filter-btn active" data-type="all">All</button>
-      <button class="filter-btn" data-type="photo">🖼 Photos</button>
-      <button class="filter-btn" data-type="video">🎬 Videos</button>
-      <button class="filter-btn" data-type="vector">✏️ Vectors</button>
-      <button class="filter-btn" data-type="illustration">🎨 Illust.</button>
-      <select class="sort-sel" id="sort-sel">
-        <option value="downloads">Most Downloads</option>
-        <option value="newest">Newest First</option>
-        <option value="oldest">Oldest First</option>
-      </select>
-    </div>
+  <div id="assets">
+    <div class="assets-count">Showing <b id="count">0</b> assets</div>
+    <div class="grid" id="grid"></div>
   </div>
 
-  <div id="assets-section">
-    <div class="assets-hdr">
-      <div class="assets-count">Showing <b id="show-count">0</b> assets</div>
-    </div>
-    <div id="assets-grid" class="assets-grid"></div>
-    <button id="load-more" class="load-more hidden">Load More</button>
-  </div>
+  <div id="console" class="console" style="display:none"></div>
 </main>
 
-<div class="toast" id="toast"></div>
-
 <script>
-const $ = id => document.getElementById(id);
-const fmt = n => n==null?'—':Number(n).toLocaleString();
-
-function showToast(msg,type){
-  const t=$('toast');
-  t.textContent=msg;
-  t.className='toast'+(type==='red'?' red':'');
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-function extractUID(s){
-  if(!s)return null;
-  s=s.trim();
-  if(/^[0-9]+$/.test(s))return s;
-  const m=s.match(/contributor\/(\d+)/i)||s.match(/creator_id=(\d+)/i);
-  return m?m[1]:null;
-}
-
-const BASE='https://stock.adobe.com';
-let uid=null, allAssets=[], filtered=[], page=0;
-const PG=24;
-
-async function fc(url){
-  try{
-    const r=await fetch(url,{headers:{'Accept':'text/html'}});
-    const h=await r.text();
-    const m=h.match(/"totalResults":\s*([0-9]+)/i)||h.match(/([0-9,]+)\s+results/i);
-    return m?parseInt(m[1].replace(/,/g,''),10):0;
-  }catch{return 0;}
-}
-
-async function getName(id){
-  try{
-    const r=await fetch(`${BASE}/contributor/${id}`);
-    const h=await r.text();
-    const m=h.match(/<title[^>]*>([^<]+)<\/title>/i);
-    return m?m[1].replace(/\s*[-|].*$/,'').trim():'ID: '+id;
-  }catch{return 'ID: '+id;}
-}
-
-async function getAssets(id,type,sort,offset){
-  try{
-    let url=`${BASE}/search?creator_id=${id}&limit=100&offset=${offset}`;
-    if(type&&type!=='all')url+=`&filters[content_type:${type}]=1`;
-    if(sort==='downloads')url+='&order=nb_downloads';
-    else if(sort==='newest')url+='&order=newest';
-    else if(sort==='oldest')url+='&order=creation_date-asc';
-    const r=await fetch(url,{headers:{'Accept':'text/html'}});
-    const h=await r.text();
-    const assets=[];
-    const dm=h.match(/window\.__STATE__\s*=\s*(\{[\s\S]*?\});<\/script>/);
-    if(dm){
-      try{
-        const st=JSON.parse(dm[1]);
-        const list=st?.search?.assets?.list||st?.assets?.list||[];
-        list.forEach(i=>assets.push({
-          id:i.id,title:i.title||i.description||'Untitled',
-          downloads:i.nb_results||i.download_count||0,
-          date:i.creation_date||i.uploaded_at||'',
-          type:i.content_type||'photo',
-          thumb:i.thumbnail_url||i.comp_url||'',
-          keywords:(i.keywords||[]).slice(0,5),
-          url:`${BASE}/stock-photo/${i.id}`
-        }));
-      }catch(e){}
-    }
-    if(!assets.length){
-      const matches=[...h.matchAll(/"id":(\d+).*?"title":"((?:[^"\\]|\\.)*).*?"nb_results":(\d+).*?"creation_date":"([^"]*).*?"content_type":"([^"]*).*?"thumbnail_url":"([^"]*)"/g)];
-      matches.forEach(m=>assets.push({
-        id:m[1],title:m[2].replace(/\\"/g,'"'),downloads:parseInt(m[3])||0,
-        date:m[4],type:m[5],thumb:m[6].replace(/\\\//g,'/'),
-        keywords:[],url:`${BASE}/stock-photo/${m[1]}`
-      }));
-    }
-    return assets;
-  }catch{return [];}
-}
-
-function typeBadge(t){
-  const map={
-    photo:['tp','🖼 Photo'],video:['tv','🎬 Video'],
-    illustration:['ti','🎨 Illust'],zip_vector:['tvc','✏️ Vector'],
-    template:['tt','📄 Template']
-  };
-  const [cls,label]=map[t]||['tp','📁 File'];
-  return `<span class="type-badge ${cls}">${label}</span>`;
-}
-
-function skeletons(){
-  $('assets-grid').innerHTML=Array(12).fill(`<div class="skeleton"><div class="sk-thumb"></div><div class="sk-body"><div class="sk-line"></div><div class="sk-line sk-short"></div></div></div>`).join('');
-}
-
-function renderAssets(reset){
-  const grid=$('assets-grid');
-  if(reset){grid.innerHTML='';page=0;}
-  const s=page*PG, e=s+PG, slice=filtered.slice(s,e);
-  $('show-count').textContent=fmt(filtered.length);
-  if(!slice.length&&reset){
-    grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">🔍</div><p>কোনো asset পাওয়া যায়নি</p></div>`;
-    $('load-more').classList.add('hidden');
-    return;
-  }
-  slice.forEach(a=>{
-    const card=document.createElement('div');
-    card.className='asset-card';
-    card.onclick=()=>window.open(a.url||`${BASE}/search?creator_id=${uid}`,'_blank');
-    const dt=a.date?new Date(a.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';
-    const kw=(a.keywords||[]).slice(0,4).map(k=>`<span class="kw">${k}</span>`).join('');
-    card.innerHTML=`
-      ${a.thumb?`<img class="asset-thumb" src="${a.thumb}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:'' }
-      <div class="asset-no-thumb" style="${a.thumb?'display:none':''}">📁</div>
-      <div class="asset-info">
-        ${typeBadge(a.type)}
-        <div class="asset-title">${a.title}</div>
-        <div class="asset-meta">
-          <div class="asset-dl">⬇ ${fmt(a.downloads)}</div>
-          <div class="asset-date">📅 ${dt}</div>
-        </div>
-        <div class="kw-wrap">${kw}</div>
-      </div>`;
-    grid.appendChild(card);
-  });
-  page++;
-  filtered.length>e ? $('load-more').classList.remove('hidden') : $('load-more').classList.add('hidden');
-}
+const $=id=>document.getElementById(id);
+const log=msg=>{
+  const c=$('console');
+  c.style.display='block';
+  c.textContent+=(c.textContent?'\n':'')+msg;
+  c.scrollTop=c.scrollHeight;
+};
 
 async function track(){
-  uid=extractUID($('cid-input').value);
-  if(!uid){showToast('Valid Contributor ID দিন','red');return;}
-  allAssets=[];filtered=[];page=0;
-  $('track-btn').disabled=true;
-  $('track-txt').classList.add('hidden');
-  $('track-spin').classList.remove('hidden');
-  $('profile-section').style.display='block';
-  $('filter-section').style.display='block';
-  $('assets-section').style.display='block';
-  skeletons();
-  const sort=$('sort-sel').value;
-  const [name,total,photo,video,vec,ill]=await Promise.all([
-    getName(uid),
-    fc(`${BASE}/search?creator_id=${uid}`),
-    fc(`${BASE}/search?creator_id=${uid}&filters[content_type:photo]=1`),
-    fc(`${BASE}/search?creator_id=${uid}&filters[content_type:video]=1`),
-    fc(`${BASE}/search?creator_id=${uid}&filters[content_type:zip_vector]=1`),
-    fc(`${BASE}/search?creator_id=${uid}&filters[content_type:illustration]=1`),
-  ]);
-  $('p-name').textContent=name;
-  $('p-id').textContent='ID: '+uid;
-  $('p-total').textContent=fmt(total);
-  $('p-photo').textContent=fmt(photo);
-  $('p-video').textContent=fmt(video);
-  $('p-vec').textContent=fmt(vec);
-  $('p-ill').textContent=fmt(ill);
-  const assets=await getAssets(uid,'all',sort,0);
-  allAssets=assets;filtered=assets;
-  renderAssets(true);
-  $('track-btn').disabled=false;
-  $('track-txt').classList.remove('hidden');
-  $('track-spin').classList.add('hidden');
-}
-
-async function loadMore(){
-  const btn=$('load-more');
-  btn.disabled=true;btn.textContent='Loading...';
-  if(page*PG>=allAssets.length&&allAssets.length%100===0){
-    const type=document.querySelector('.filter-btn.active')?.dataset.type||'all';
-    const more=await getAssets(uid,type==='all'?'':type,$('sort-sel').value,allAssets.length);
-    allAssets=[...allAssets,...more];filtered=allAssets;
+  const cid=$('cid').value.trim();
+  if(!cid){alert('Enter Contributor ID');return}
+  
+  log('📍 Starting track for ID: '+cid);
+  
+  $('btn').disabled=true;
+  $('btn').textContent='Tracking...';
+  $('profile').style.display='none';
+  $('assets').style.display='none';
+  
+  try{
+    // Step 1: Get contributor name
+    log('🔍 Fetching contributor name...');
+    const nameRes=await fetch('https://stock.adobe.com/contributor/'+cid);
+    const nameHtml=await nameRes.text();
+    const nameMa=nameHtml.match(/<h1[^>]*>([^<]+)<\/h1>/i)||nameHtml.match(/<title>([^<]+)<\/title>/i);
+    const name=nameMa?(nameMa[1]||'').split('|')[0].trim():'ID: '+cid;
+    log('✅ Name: '+name);
+    
+    // Step 2: Get counts
+    log('📊 Fetching asset counts...');
+    const [total,photo,video,vector]=await Promise.all([
+      getCount(cid,''),
+      getCount(cid,'photo'),
+      getCount(cid,'video'),
+      getCount(cid,'zip_vector')
+    ]);
+    log('✅ Total: '+total+', Photos: '+photo+', Videos: '+video+', Vectors: '+vector);
+    
+    // Step 3: Get assets
+    log('🖼️  Fetching assets...');
+    const assets=await getAssets(cid);
+    log('✅ Got '+assets.length+' assets');
+    
+    // Display
+    $('name').textContent=name;
+    $('id').textContent='ID: '+cid;
+    $('total').textContent=total;
+    $('photo').textContent=photo;
+    $('video').textContent=video;
+    $('vector').textContent=vector;
+    $('count').textContent=assets.length;
+    
+    const grid=$('grid');
+    grid.innerHTML='';
+    
+    if(!assets.length){
+      grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div style="font-size:48px;margin-bottom:12px">🔍</div>No assets found</div>';
+    }else{
+      assets.slice(0,48).forEach(a=>{
+        const d=document.createElement('div');
+        d.className='asset';
+        d.onclick=()=>window.open('https://stock.adobe.com/stock-photo/'+a.id,'_blank');
+        const dt=a.date?new Date(a.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'—';
+        d.innerHTML=`<img class="thumb" src="${a.thumb}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 75%22%3E%3Crect fill=%22%23222%22 width=%22100%22 height=%2275%22/%3E%3C/svg%3E'"><div class="info"><div class="asset-title">${a.title}</div><div class="meta"><span>⬇ ${(a.downloads||0).toLocaleString()}</span><span>${dt}</span></div></div>`;
+        grid.appendChild(d);
+      });
+    }
+    
+    $('profile').style.display='block';
+    $('assets').style.display='block';
+    log('✅ Done!');
+    
+  }catch(e){
+    log('❌ Error: '+e.message);
+    alert('Error: '+e.message);
   }
-  renderAssets(false);
-  btn.disabled=false;btn.textContent='Load More';
+  
+  $('btn').disabled=false;
+  $('btn').textContent='Track';
 }
 
-document.querySelectorAll('.filter-btn').forEach(b=>{
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    const t=b.dataset.type;
-    const typeMap={photo:'photo',video:'video',vector:'zip_vector',illustration:'illustration'};
-    filtered=t==='all'?allAssets:allAssets.filter(a=>a.type===(typeMap[t]||t)||a.type===t);
-    renderAssets(true);
-  });
-});
+async function getCount(cid,type){
+  try{
+    let url='https://stock.adobe.com/search?creator_id='+cid;
+    if(type)url+='&filters[content_type:'+type+']=1';
+    const r=await fetch(url);
+    const h=await r.text();
+    const m=h.match(/"estimated"\s*:\s*(\d+)|"totalResults"\s*:\s*(\d+)/i);
+    return m?parseInt(m[1]||m[2]||0):0;
+  }catch{return 0}
+}
 
-$('sort-sel').addEventListener('change',()=>{
-  const s=$('sort-sel').value;
-  if(s==='downloads')filtered.sort((a,b)=>(b.downloads||0)-(a.downloads||0));
-  else if(s==='newest')filtered.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
-  else if(s==='oldest')filtered.sort((a,b)=>new Date(a.date||0)-new Date(b.date||0));
-  renderAssets(true);
-});
+async function getAssets(cid){
+  try{
+    const url='https://stock.adobe.com/search?creator_id='+cid+'&limit=100';
+    const r=await fetch(url);
+    const h=await r.text();
+    const assets=[];
+    const regex=/"id":(\d+),"title":"([^"]*)","nb_results":(\d+),"creation_date":"([^"]*)","content_type":"([^"]*)"(?:.*?"thumbnail_url":"([^"]*)")?/g;
+    let m;
+    while((m=regex.exec(h))){
+      assets.push({
+        id:m[1],
+        title:m[2]||'Untitled',
+        downloads:parseInt(m[3])||0,
+        date:m[4],
+        type:m[5],
+        thumb:(m[6]||'').replace(/\\\//g,'/')
+      });
+    }
+    return assets;
+  }catch(e){
+    log('Asset fetch error: '+e.message);
+    return [];
+  }
+}
 
-$('track-btn').addEventListener('click',track);
-$('load-more').addEventListener('click',loadMore);
-$('cid-input').addEventListener('keydown',e=>{if(e.key==='Enter')track();});
+$('cid').addEventListener('keydown',e=>{if(e.key==='Enter')track()});
 </script>
 </body>
 </html>
